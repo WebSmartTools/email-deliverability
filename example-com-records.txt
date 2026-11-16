@@ -1,0 +1,40 @@
+# Worked Example: example.com
+
+Domain `example.com` sends through Google Workspace for mailboxes and SendGrid for transactional mail. Reports go to `dmarc@example.com`.
+
+## SPF record
+
+Publish as a TXT record at the root of `example.com`:
+
+```
+v=spf1 include:_spf.google.com include:sendgrid.net ~all
+```
+
+Lookup count: Google Workspace 1, SendGrid 2. Total 3 of 10.
+
+## DMARC record
+
+Publish as a TXT record at `_dmarc.example.com`, starting at `none`:
+
+```
+v=DMARC1; p=none; rua=mailto:dmarc@example.com;
+```
+
+## Rollout
+
+1. Publish both records and verify them with a live lookup.
+2. Read the aggregate reports at `dmarc@example.com` for at least two weeks. Every legitimate sender must pass.
+3. Move `p=none` to `p=quarantine`, watch the reports for two more weeks.
+4. Move `p=quarantine` to `p=reject`, and keep the `rua` address in place.
+
+## DKIM
+
+- Google Workspace: set up DKIM in the Workspace admin console. The default selector is `google`.
+- SendGrid: authenticate the domain in SendGrid. SendGrid gives the selectors to publish; DKIM then carries DMARC for SendGrid mail, because SendGrid's default return-path does not align for SPF.
+
+## What to check after publishing
+
+- The SPF record returns exactly one record and the lookup total is 3.
+- The DMARC record is found at `_dmarc.example.com` with `p=none` and the right `rua` address.
+- A DKIM key record exists for each provider's selector.
+- After the TTL has passed, re-check with live lookups. DNS changes take time to spread.
