@@ -1,4 +1,5 @@
 # email-deliverability
+[![Listed on mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/websmarttools/email-deliverability)
 
 Build and check SPF, DKIM, and DMARC records for a domain, using live DNS lookups.
 
